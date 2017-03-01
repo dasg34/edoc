@@ -37,6 +37,25 @@ PKG_CHECK_MODULES([EFL],
  elementary >= 1.8.0
 ])
 
+# Check for Clang
+have_clang="no"
+AC_CHECK_HEADERS([clang-c/Index.h], [have_clang="yes"], [have_clang="no"])
+if test "${have_clang}" = "yes"; then
+   ldflags="$LDFLAGS"
+   LDFLAGS+=" -L${libdir}/llvm"
+   AC_CHECK_LIB([clang], [clang_Cursor_getArgument],
+      [
+       AC_DEFINE([HAVE_LIBCLANG], [1], [Set to 1 if clang is found])
+       EFL_LIBS="${EFL_LIBS} -lclang"
+      ],
+      [have_clang="no"])
+fi
+if test "${have_clang}" = "no"; then
+   AC_MSG_ERROR([Could not find a usable libclang.])
+fi
+CLANG_INCLUDE=`clang -E - -v < /dev/null 2>&1 | grep "^ /usr" | grep clang`
+AC_SUBST([CLANG_INCLUDE])
+
 # Check for tests and coverage
 AC_ARG_WITH([tests],
    [AC_HELP_STRING([--with-tests=none|regular|coverage],
@@ -85,6 +104,7 @@ echo
 echo "Compilation..............: make (or gmake)"
 echo "  CFLAGS.................: $CFLAGS"
 echo "  edje_cc................: ${edje_cc}"
+echo "  libclang...............: ${have_clang}"
 echo
 echo "Building documentation...: ${build_doc}"
 echo "Building tests...........: ${have_tests}"
