@@ -25,28 +25,80 @@ _edoc_win_del(void *data EINA_UNUSED, Evas_Object *obj EINA_UNUSED, void *event_
    elm_exit();
 }
 
+static void
+_search_box_set(Evas_Object *box)
+{
+   Evas_Object *label, *entry, *icon, *btn;
+   Evas_Coord h;
+
+   label = elm_label_add(box);
+   elm_object_text_set(label, "API : ");
+   evas_object_size_hint_weight_set(label, 0, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(label, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   evas_object_show(label);
+   elm_box_pack_end(box, label);
+
+   entry = elm_entry_add(box);
+   elm_entry_scrollable_set(entry, EINA_TRUE);
+   elm_entry_single_line_set(entry, EINA_TRUE);
+   evas_object_size_hint_weight_set(entry, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(entry, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   evas_object_show(entry);
+   elm_box_pack_end(box, entry);
+
+   icon = elm_icon_add(box);
+   evas_object_size_hint_align_set(icon, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   elm_box_recalculate(box);
+   evas_object_geometry_get(entry, NULL, NULL, NULL, &h);
+   evas_object_size_hint_min_set(icon, h, h);
+   elm_icon_standard_set(icon, "edit-find");
+
+   btn = elm_button_add(box);
+   elm_object_part_content_set(btn, "icon", icon);
+   //evas_object_smart_callback_add(btn, "clicked", _btn_cb_clicked, NULL);
+   evas_object_show(btn);
+   elm_box_pack_end(box, btn);
+}
+
+
 static Evas_Object *
 edoc_win_setup(void)
 {
-   Evas_Object *win;
-   Evas_Object *label;
+   Evas_Object *win, *search_box, *main_box, *entry;
+
 
    win = elm_win_util_standard_add("main", "edoc");
    if (!win) return NULL;
 
-   elm_win_focus_highlight_enabled_set(win, EINA_TRUE);
+   elm_win_focus_highlight_enabled_set(win, EINA_FALSE);
    evas_object_smart_callback_add(win, "delete,request", _edoc_win_del, NULL);
 
-   label = elm_label_add(win);
-   elm_object_text_set(label, " Hello World !");
-   evas_object_size_hint_weight_set(label, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-   evas_object_size_hint_align_set(label, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   evas_object_show(label);
+   /* main box */
+   main_box = elm_box_add(win);
+   evas_object_size_hint_weight_set(main_box, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(main_box, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   elm_win_resize_object_add(win, main_box);
+   evas_object_show(main_box);
 
-   elm_win_resize_object_add(win, label);
-   evas_object_resize(win, 300 * elm_config_scale_get(),
-                           200 * elm_config_scale_get());
+   /* search box */
+   search_box = elm_box_add(win);
+   elm_box_horizontal_set(search_box, EINA_TRUE);
+   evas_object_size_hint_weight_set(search_box, EVAS_HINT_EXPAND, 0);
+   evas_object_size_hint_align_set(search_box, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   evas_object_show(search_box);
+   elm_box_pack_end(main_box, search_box);
+   _search_box_set(search_box);
 
+   entry = elm_entry_add(main_box);
+   elm_entry_scrollable_set(entry, EINA_TRUE);
+   elm_entry_editable_set(entry, EINA_FALSE);
+   evas_object_size_hint_weight_set(entry, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(entry, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   evas_object_show(entry);
+   elm_box_pack_end(main_box, entry);
+
+   evas_object_resize(win, 400 * elm_config_scale_get(),
+                           500 * elm_config_scale_get());
    evas_object_show(win);
 
    return win;
