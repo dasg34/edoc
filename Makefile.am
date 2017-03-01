@@ -40,7 +40,7 @@ files_DATA = \
 	ChangeLog \
 	INSTALL \
 	NEWS \
-	README \
+	README.md \
 	TODO
 
 EXTRA_DIST = \
