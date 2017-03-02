@@ -27,9 +27,9 @@ struct _Edoc_Data
    Ecore_Thread *clang_thread;
 };
 
-void edoc_clang_init(Edoc_Data *edoc);
+void edoc_search_init(Edoc_Data *edoc);
 
-void edoc_clang_destroy(Edoc_Data *edoc);
+void edoc_search_destroy(Edoc_Data *edoc);
 
 void search_popup_setup(Edoc_Data *edoc);
 

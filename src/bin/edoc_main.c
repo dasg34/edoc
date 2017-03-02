@@ -38,7 +38,7 @@ _edoc_win_del(void *data, Evas_Object *obj EINA_UNUSED,
               void *event_info EINA_UNUSED)
 {
    Edoc_Data *edoc = data;
-   edoc_clang_destroy(edoc);
+   edoc_search_destroy(edoc);
    free(edoc);
 
    elm_exit();
@@ -129,7 +129,7 @@ edoc_win_setup(void)
 
    edoc = (Edoc_Data *)calloc(1, sizeof(Edoc_Data));
    edoc->win = win;
-   edoc_clang_init(edoc);
+   edoc_search_init(edoc);
 
    elm_win_focus_highlight_enabled_set(win, EINA_FALSE);
    evas_object_smart_callback_add(win, "delete,request", _edoc_win_del, edoc);

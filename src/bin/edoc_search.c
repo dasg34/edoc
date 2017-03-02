@@ -300,7 +300,7 @@ search_popup_update(Edoc_Data *edoc, char *word)
 }
 
 void
-edoc_clang_init(Edoc_Data *edoc)
+edoc_search_init(Edoc_Data *edoc)
 {
    char path[PATH_MAX];
    const char *args;
@@ -327,7 +327,7 @@ edoc_clang_init(Edoc_Data *edoc)
 }
 
 void
-edoc_clang_destroy(Edoc_Data *edoc)
+edoc_search_destroy(Edoc_Data *edoc)
 {
    clang_disposeTranslationUnit(edoc->clang_unit);
    clang_disposeIndex(edoc->clang_idx);

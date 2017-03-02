@@ -14,7 +14,7 @@ AM_CPPFLAGS = -DPACKAGE_DATA_DIR=\"$(datadir)/$(PACKAGE)\" \
 
 edoc_SOURCES = \
 edoc_main.c \
-edoc_document.c \
+edoc_search.c \
 edoc_private.h
 
 edoc_LDADD = @EFL_LIBS@ $(top_builddir)/src/lib/libedoc.la
