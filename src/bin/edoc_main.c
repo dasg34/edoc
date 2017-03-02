@@ -20,13 +20,64 @@
 #define COPYRIGHT "Copyright © 2017 yohoho <cleanlyj@gmail.com> and various contributors (see AUTHORS)."
 
 static void
-_edoc_win_del(void *data EINA_UNUSED, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
+_temp_file_set()
 {
+   char path[PATH_MAX];
+   const char *buf = "#include <Elementary.h> \nint main(){";
+   FILE *fp;
+
+   snprintf(path, sizeof(path), "%s/edoc_tmp.c", eina_environment_tmp_get());
+   fp = fopen(path, "w");
+
+   fwrite(buf, sizeof(char), strlen(buf), fp);
+   fclose(fp);
+}
+
+static void
+_edoc_win_del(void *data, Evas_Object *obj EINA_UNUSED,
+              void *event_info EINA_UNUSED)
+{
+   Edoc_Data *edoc = data;
+   edoc_clang_destroy(edoc);
+   free(edoc);
+
    elm_exit();
 }
 
 static void
-_search_box_set(Evas_Object *box)
+_entry_cb_cursor_changed(void *data, Evas_Object *obj EINA_UNUSED,
+                         void *event_info EINA_UNUSED)
+{
+   Edoc_Data *edoc;
+   Eina_List *list = NULL;
+
+   edoc = (Edoc_Data*)data;
+
+   list = (Eina_List *)evas_object_data_get(edoc->genlist, "list");
+
+   if (list)
+     {
+        char *summary;
+
+        EINA_LIST_FREE(list, summary)
+          free(summary);
+
+        list = NULL;
+        evas_object_data_del(edoc->genlist, "list");
+     }
+
+   search_lookup(edoc);
+}
+
+static void
+_entry_cb_clicked(void *data EINA_UNUSED, Evas_Object *obj EINA_UNUSED,
+                  void *event_info EINA_UNUSED)
+{
+   printf("entry clicked\n");
+}
+
+static void
+_search_box_set(Edoc_Data *edoc, Evas_Object *box)
 {
    Evas_Object *label, *entry, *icon, *btn;
    Evas_Coord h;
@@ -39,10 +90,14 @@ _search_box_set(Evas_Object *box)
    elm_box_pack_end(box, label);
 
    entry = elm_entry_add(box);
+   edoc->search_entry = entry;
    elm_entry_scrollable_set(entry, EINA_TRUE);
    elm_entry_single_line_set(entry, EINA_TRUE);
    evas_object_size_hint_weight_set(entry, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_size_hint_align_set(entry, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   evas_object_smart_callback_add(entry, "cursor,changed",
+                                  _entry_cb_cursor_changed, edoc);
+   evas_object_smart_callback_add(entry, "clicked", _entry_cb_clicked, NULL);
    evas_object_show(entry);
    elm_box_pack_end(box, entry);
 
@@ -65,13 +120,19 @@ static Evas_Object *
 edoc_win_setup(void)
 {
    Evas_Object *win, *search_box, *main_box, *entry;
-
+   Edoc_Data *edoc;
 
    win = elm_win_util_standard_add("main", "edoc");
    if (!win) return NULL;
 
+   _temp_file_set();
+
+   edoc = (Edoc_Data *)calloc(1, sizeof(Edoc_Data));
+   edoc->win = win;
+   edoc_clang_init(edoc);
+
    elm_win_focus_highlight_enabled_set(win, EINA_FALSE);
-   evas_object_smart_callback_add(win, "delete,request", _edoc_win_del, NULL);
+   evas_object_smart_callback_add(win, "delete,request", _edoc_win_del, edoc);
 
    /* main box */
    main_box = elm_box_add(win);
@@ -82,12 +143,13 @@ edoc_win_setup(void)
 
    /* search box */
    search_box = elm_box_add(win);
+   edoc->search_box = search_box;
    elm_box_horizontal_set(search_box, EINA_TRUE);
    evas_object_size_hint_weight_set(search_box, EVAS_HINT_EXPAND, 0);
    evas_object_size_hint_align_set(search_box, EVAS_HINT_FILL, EVAS_HINT_FILL);
    evas_object_show(search_box);
    elm_box_pack_end(main_box, search_box);
-   _search_box_set(search_box);
+   _search_box_set(edoc, search_box);
 
    entry = elm_entry_add(main_box);
    elm_entry_scrollable_set(entry, EINA_TRUE);
@@ -96,6 +158,8 @@ edoc_win_setup(void)
    evas_object_size_hint_align_set(entry, EVAS_HINT_FILL, EVAS_HINT_FILL);
    evas_object_show(entry);
    elm_box_pack_end(main_box, entry);
+
+   search_popup_setup(edoc);
 
    evas_object_resize(win, 400 * elm_config_scale_get(),
                            500 * elm_config_scale_get());
