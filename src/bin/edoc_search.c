@@ -318,12 +318,6 @@ edoc_search_init(Edoc_Data *edoc)
                                   (int)clang_argc, NULL, 0,
                                   clang_defaultEditingTranslationUnitOptions() |
                                   CXTranslationUnit_DetailedPreprocessingRecord);
-
-   edoc->title = eina_strbuf_new();
-   edoc->detail = eina_strbuf_new();
-   edoc->param = eina_strbuf_new();
-   edoc->ret = eina_strbuf_new();
-   edoc->see = eina_strbuf_new();
 }
 
 void
