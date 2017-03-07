@@ -44,14 +44,10 @@ _edoc_win_del(void *data, Evas_Object *obj EINA_UNUSED,
    elm_exit();
 }
 
-static void
-_entry_cb_cursor_changed(void *data, Evas_Object *obj EINA_UNUSED,
-                         void *event_info EINA_UNUSED)
+void
+_edoc_search_lookup(Edoc_Data *edoc)
 {
-   Edoc_Data *edoc;
    Eina_List *list = NULL;
-
-   edoc = (Edoc_Data*)data;
 
    list = (Eina_List *)evas_object_data_get(edoc->genlist, "list");
 
@@ -70,10 +66,23 @@ _entry_cb_cursor_changed(void *data, Evas_Object *obj EINA_UNUSED,
 }
 
 static void
+_entry_cb_cursor_changed(void *data, Evas_Object *obj EINA_UNUSED,
+                         void *event_info EINA_UNUSED)
+{
+   Edoc_Data *edoc;
+
+   edoc = (Edoc_Data*)data;
+   _edoc_search_lookup(edoc);
+}
+
+static void
 _entry_cb_clicked(void *data EINA_UNUSED, Evas_Object *obj EINA_UNUSED,
                   void *event_info EINA_UNUSED)
 {
-   printf("entry clicked\n");
+   Edoc_Data *edoc;
+
+   edoc = (Edoc_Data*)data;
+   _edoc_search_lookup(edoc);
 }
 
 static void
@@ -97,7 +106,7 @@ _search_box_set(Edoc_Data *edoc, Evas_Object *box)
    evas_object_size_hint_align_set(entry, EVAS_HINT_FILL, EVAS_HINT_FILL);
    evas_object_smart_callback_add(entry, "cursor,changed",
                                   _entry_cb_cursor_changed, edoc);
-   evas_object_smart_callback_add(entry, "clicked", _entry_cb_clicked, NULL);
+   evas_object_smart_callback_add(entry, "clicked", _entry_cb_clicked, edoc);
    evas_object_show(entry);
    elm_box_pack_end(box, entry);
 
