@@ -44,6 +44,7 @@ _search_list_cb_key_down(void *data, Evas *e EINA_UNUSED, Evas_Object *obj,
         it = elm_genlist_selected_item_get(genlist);
         summary = elm_object_item_data_get(it);
 //FIXMe : show doc
+        edoc_doc_lookup(edoc, summary);
         evas_object_hide(edoc->search_bg);
      }
    else if (!strcmp(ev->key, "Up"))

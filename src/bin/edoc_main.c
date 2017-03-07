@@ -115,11 +115,35 @@ _search_box_set(Edoc_Data *edoc, Evas_Object *box)
    elm_box_pack_end(box, btn);
 }
 
+static void
+_document_box_set(Edoc_Data *edoc, Evas_Object *box)
+{
+   //Title
+   Evas_Object *title = elm_entry_add(box);
+   edoc->title_entry = title;
+   elm_entry_editable_set(title, EINA_FALSE);
+   evas_object_size_hint_weight_set(title, EVAS_HINT_EXPAND, 0);
+   evas_object_size_hint_align_set(title, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   evas_object_show(title);
+   elm_box_pack_end(box, title);
+
+   //Entry
+   Evas_Object *entry = elm_entry_add(box);
+   edoc->body_entry = entry;
+   elm_entry_editable_set(entry, EINA_FALSE);
+   elm_entry_scrollable_set(entry, EINA_TRUE);
+   elm_scroller_policy_set(entry, ELM_SCROLLER_POLICY_OFF,
+                           ELM_SCROLLER_POLICY_AUTO);
+   evas_object_size_hint_weight_set(entry, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(entry, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   evas_object_show(entry);
+   elm_box_pack_end(box, entry);
+}
 
 static Evas_Object *
 edoc_win_setup(void)
 {
-   Evas_Object *win, *search_box, *main_box, *entry;
+   Evas_Object *win, *search_box, *main_box, *doc_box;
    Edoc_Data *edoc;
 
    win = elm_win_util_standard_add("main", "edoc");
@@ -142,7 +166,7 @@ edoc_win_setup(void)
    evas_object_show(main_box);
 
    /* search box */
-   search_box = elm_box_add(win);
+   search_box = elm_box_add(main_box);
    edoc->search_box = search_box;
    elm_box_horizontal_set(search_box, EINA_TRUE);
    evas_object_size_hint_weight_set(search_box, EVAS_HINT_EXPAND, 0);
@@ -151,13 +175,13 @@ edoc_win_setup(void)
    elm_box_pack_end(main_box, search_box);
    _search_box_set(edoc, search_box);
 
-   entry = elm_entry_add(main_box);
-   elm_entry_scrollable_set(entry, EINA_TRUE);
-   elm_entry_editable_set(entry, EINA_FALSE);
-   evas_object_size_hint_weight_set(entry, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-   evas_object_size_hint_align_set(entry, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   evas_object_show(entry);
-   elm_box_pack_end(main_box, entry);
+   /* document box */
+   doc_box = elm_box_add(main_box);
+   evas_object_size_hint_weight_set(doc_box, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(doc_box, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   evas_object_show(doc_box);
+   elm_box_pack_end(main_box, doc_box);
+   _document_box_set(edoc, doc_box);
 
    search_popup_setup(edoc);
 

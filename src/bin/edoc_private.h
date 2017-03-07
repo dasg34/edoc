@@ -14,6 +14,8 @@ struct _Edoc_Data
    Evas_Object *search_bg;
    Evas_Object *search_box;
    Evas_Object *search_entry;
+   Evas_Object *title_entry;
+   Evas_Object *body_entry;
 
    Eina_Strbuf *title;
    Eina_Strbuf *detail;
@@ -36,5 +38,7 @@ void search_popup_setup(Edoc_Data *edoc);
 void search_popup_update(Edoc_Data *edoc, char *word);
 
 void search_lookup(Edoc_Data *edoc);
+
+void edoc_doc_lookup(Edoc_Data *edoc, char *summary);
 
 #endif
