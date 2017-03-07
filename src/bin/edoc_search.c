@@ -74,8 +74,8 @@ _search_list_cb_clicked_double(void *data, Evas_Object *obj EINA_UNUSED,
    Edoc_Data *edoc = (Edoc_Data *)data;
 
    summary = elm_object_item_data_get(it);
-   //FIXMe : show doc
-   //
+
+   document_lookup(edoc, summary);
    evas_object_hide(edoc->search_bg);
 }
 
@@ -147,7 +147,7 @@ _search_popup_show(Edoc_Data *edoc)
 }
 
 static void
-_thread_cb_lookup(void *data, Ecore_Thread *thread)
+_search_thread_cb_lookup(void *data, Ecore_Thread *thread)
 {
    Edoc_Data *edoc = data;
    Eina_List *list = NULL;
@@ -219,7 +219,7 @@ _thread_cb_lookup(void *data, Ecore_Thread *thread)
 }
 
 static void
-_thread_cb_end(void *data, Ecore_Thread *thread EINA_UNUSED)
+_search_thread_cb_end(void *data, Ecore_Thread *thread EINA_UNUSED)
 {
    Edoc_Data *edoc;
    int pos;
@@ -238,7 +238,7 @@ _thread_cb_end(void *data, Ecore_Thread *thread EINA_UNUSED)
 }
 
 static void
-_thread_cb_cancel(void *data, Ecore_Thread *thread EINA_UNUSED)
+_search_thread_cb_cancel(void *data, Ecore_Thread *thread EINA_UNUSED)
 {
    Edoc_Data *edoc;
 
@@ -256,7 +256,8 @@ search_lookup(Edoc_Data *edoc)
         edoc->clang_thread = NULL;
      }
 
-   edoc->clang_thread = ecore_thread_run(_thread_cb_lookup, _thread_cb_end, _thread_cb_cancel, edoc);
+   edoc->clang_thread = ecore_thread_run(_search_thread_cb_lookup,
+                          _search_thread_cb_end, _search_thread_cb_cancel, edoc);
 }
 
 void
@@ -301,7 +302,7 @@ search_popup_update(Edoc_Data *edoc, char *word)
 }
 
 void
-edoc_search_init(Edoc_Data *edoc)
+search_init(Edoc_Data *edoc)
 {
    char path[PATH_MAX];
    const char *args;
@@ -322,7 +323,7 @@ edoc_search_init(Edoc_Data *edoc)
 }
 
 void
-edoc_search_destroy(Edoc_Data *edoc)
+search_destroy(Edoc_Data *edoc)
 {
    clang_disposeTranslationUnit(edoc->clang_unit);
    clang_disposeIndex(edoc->clang_idx);
