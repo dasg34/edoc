@@ -39,6 +39,6 @@ void search_popup_update(Edoc_Data *edoc, char *word);
 
 void search_lookup(Edoc_Data *edoc);
 
-void edoc_doc_lookup(Edoc_Data *edoc, char *summary);
+void document_lookup(Edoc_Data *edoc, char *summary);
 
 #endif

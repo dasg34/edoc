@@ -5,7 +5,7 @@
 #include "edoc_private.h"
 
 static void
-edoc_doc_init(Edoc_Data *edoc)
+_document_init(Edoc_Data *edoc)
 {
    edoc->title = eina_strbuf_new();
    edoc->detail = eina_strbuf_new();
@@ -15,7 +15,7 @@ edoc_doc_init(Edoc_Data *edoc)
 }
 
 static void
-_edoc_doc_free(Edoc_Data *edoc)
+_document_free(Edoc_Data *edoc)
 {
    if (!edoc) return;
 
@@ -27,7 +27,7 @@ _edoc_doc_free(Edoc_Data *edoc)
 }
 
 static Eina_Bool
-edoc_doc_newline_check(Eina_Strbuf *strbuf)
+_document_newline_check(Eina_Strbuf *strbuf)
 {
    const char *str;
 
@@ -45,7 +45,7 @@ edoc_doc_newline_check(Eina_Strbuf *strbuf)
 }
 
 static void
-edoc_doc_trim(Eina_Strbuf *strbuf)
+_document_trim(Eina_Strbuf *strbuf)
 {
    const char *str;
    int cmp_strlen, ori_strlen;
@@ -62,14 +62,14 @@ edoc_doc_trim(Eina_Strbuf *strbuf)
    if (!strcmp(str, "<br><br>"))
      {
         eina_strbuf_remove(strbuf, cmp_strlen, ori_strlen);
-        edoc_doc_trim(strbuf);
+        _document_trim(strbuf);
      }
    else
      return;
 }
 
 static void
-edoc_doc_title_get(CXCursor cursor, Eina_Strbuf *strbuf)
+_document_title_get(CXCursor cursor, Eina_Strbuf *strbuf)
 {
    CXCompletionString str;
    int chunk_num;
@@ -99,7 +99,7 @@ edoc_doc_title_get(CXCursor cursor, Eina_Strbuf *strbuf)
 }
 
 static void
-edoc_doc_dump(Edoc_Data *edoc, CXComment comment, Eina_Strbuf *strbuf)
+_document_dump(Edoc_Data *edoc, CXComment comment, Eina_Strbuf *strbuf)
 {
    const char *str ,*tag;
    enum CXCommentKind kind = clang_Comment_getKind(comment);
@@ -118,7 +118,7 @@ edoc_doc_dump(Edoc_Data *edoc, CXComment comment, Eina_Strbuf *strbuf)
           }
         if (clang_Comment_isWhitespace(comment))
           {
-             if (edoc_doc_newline_check(strbuf))
+             if (_document_newline_check(strbuf))
                {
                   if (strbuf == edoc->detail)
                     eina_strbuf_append(strbuf, "<br><br>");
@@ -177,11 +177,11 @@ edoc_doc_dump(Edoc_Data *edoc, CXComment comment, Eina_Strbuf *strbuf)
         break;
      }
    for (unsigned i = 0; i < clang_Comment_getNumChildren(comment); i++)
-     edoc_doc_dump(edoc, clang_Comment_getChild(comment, i), strbuf);
+     _document_dump(edoc, clang_Comment_getChild(comment, i), strbuf);
 }
 
 static CXCursor
-_edoc_doc_cursor_get(Edoc_Data *edoc)
+_document_cursor_get(Edoc_Data *edoc)
 {
    CXFile cxfile;
    CXSourceLocation location;
@@ -198,7 +198,7 @@ _edoc_doc_cursor_get(Edoc_Data *edoc)
 }
 
 void
-edoc_doc_lookup(Edoc_Data *edoc, char *summary)
+document_lookup(Edoc_Data *edoc, char *summary)
 {
    CXCursor cursor;
    CXComment comment;
@@ -221,17 +221,17 @@ edoc_doc_lookup(Edoc_Data *edoc, char *summary)
 
    clang_reparseTranslationUnit(edoc->clang_unit, 1, &unsaved_file,
                                 clang_defaultReparseOptions(edoc->clang_idx));
-   cursor = _edoc_doc_cursor_get(edoc);
+   cursor = _document_cursor_get(edoc);
    comment = clang_Cursor_getParsedComment(cursor);
 
    if (clang_Comment_getKind(comment) == CXComment_Null)
      return;
 
-   _edoc_doc_free(edoc);
-   edoc_doc_init(edoc);
-   edoc_doc_dump(edoc, comment, edoc->detail);
-   edoc_doc_title_get(cursor, edoc->title);
-   edoc_doc_trim(edoc->detail);
+   _document_free(edoc);
+   _document_init(edoc);
+   _document_dump(edoc, comment, edoc->detail);
+   _document_title_get(cursor, edoc->title);
+   _document_trim(edoc->detail);
 
    elm_object_text_set(edoc->title_entry, eina_strbuf_string_get(edoc->title));
    elm_object_text_set(edoc->body_entry, eina_strbuf_string_get(edoc->detail));
